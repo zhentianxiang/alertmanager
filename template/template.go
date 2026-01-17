@@ -180,6 +180,45 @@ var DefaultFuncs = FuncMap{
 		return cases.Title(language.AmericanEnglish).String(text)
 	},
 	"trimSpace": strings.TrimSpace,
+        "default": func(def any, v any) any {
+            if v == nil {
+                return def
+            }
+        
+            rv := reflect.ValueOf(v)
+            if !rv.IsValid() {
+                return def
+            }
+        
+            switch rv.Kind() {
+            case reflect.String:
+                if rv.Len() == 0 {
+                    return def
+                }
+            case reflect.Slice, reflect.Map:
+                if rv.Len() == 0 {
+                    return def
+                }
+            case reflect.Bool:
+                if !rv.Bool() {
+                    return def
+                }
+            case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+                if rv.Int() == 0 {
+                    return def
+                }
+            case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+                if rv.Uint() == 0 {
+                    return def
+                }
+            case reflect.Float32, reflect.Float64:
+                if rv.Float() == 0 {
+                    return def
+                }
+            }
+        
+            return v
+        },
 	// join is equal to strings.Join but inverts the argument order
 	// for easier pipelining in templates.
 	"join": func(sep string, s []string) string {
